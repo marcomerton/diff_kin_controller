@@ -1,0 +1,5 @@
+<launch>
+	<rosparam command="load" file="$(find diff_kin_controller)/config/params.yaml" />
+	<node name="controller_node" pkg="diff_kin_controller" type="ArmController.py" output="screen" />
+	<node name="main_node" pkg="diff_kin_controller" type="prova.py" output="screen" />
+</launch>
