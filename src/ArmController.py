@@ -8,7 +8,7 @@ import kdl_parser_py.urdf as kdl_parser
 
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
-from geometry_msgs.msg import Pose, Quaternion
+from geometry_msgs.msg import Pose, Twist
 
 from kdl_utils import *
 
@@ -23,6 +23,7 @@ class ArmController:
     def __init__(self,
                 arm_chain,          # kdl.Chain representing the arm
                 desired_pose_topic, # topic name where the desided pose is published
+                desired_vel_topic,  # topic name where the desired velocity is published
                 state_topic,        # topic name where the joints position is published
                 command_topic,      # topic name where to publish commands for the arm
                 rate = 200,         # rate at which the controller is executed
@@ -36,9 +37,6 @@ class ArmController:
         # Initialize state variables and utility variables
         self._joint_position = None
         self._rate = rate
-        self._xdot = kdl.Twist()
-
-        self._xdot.vel = kdl.Vector(-0.04, -0.14, -0.102)
 
         # Setup current joint position subscriber
         def jnt_pos_callback(state):
@@ -57,11 +55,21 @@ class ArmController:
         self._x_p = x_e.p
         self._x_o = quaternion_to_couple(x_e.M.GetQuaternion())
 
+        # Set desired velocity to zero
+        self._xdot = kdl.Twist()
+
+        #self._xdot.vel = kdl.Vector(-0.04, -0.14, -0.102)
+
         # Setup desired ee pose listener
         def des_pose_callback(pose):
             self._x_p = point_to_kdl_vector(pose.position)
             self._x_o = quaternion_to_couple(pose.orientation)
         rospy.Subscriber(desired_pose_topic, Pose, des_pose_callback)
+
+        # Setup desired velocity listener
+        def des_vel_callback(twist):
+            self._xdot = twist_to_kdl_twist(twist)
+        rospy.Subscriber(desired_vel_topic, Twist, des_vel_callback)
 
 
     def run(self, verbose=False):
@@ -185,9 +193,10 @@ if __name__ == "__main__":
     joint_command_topic = rospy.get_param("joint_command_topic")
     joint_state_topic = rospy.get_param("joint_state_topic")
     desired_pose_topic = rospy.get_param("desired_pose_topic")
+    desired_vel_topic = rospy.get_param("desired_vel_topic")
 
     # Initialize controller
-    c = ArmController(chain, desired_pose_topic, joint_state_topic, joint_command_topic)
+    c = ArmController(chain, desired_pose_topic, desired_vel_topic, joint_state_topic, joint_command_topic)
 
     # Start controler
     c.run(verbose=True)

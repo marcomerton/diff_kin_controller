@@ -4,7 +4,7 @@ import numpy as np
 
 
 def new_JntArray(joints_pos):
-    ''' Creates a new JntArray from the given joint positions '''
+    ''' Creates a new kdl.JntArray from the given joint positions '''
 
     j = kdl.JntArray(len(joints_pos))
     for i in range(len(joints_pos)):
@@ -12,9 +12,8 @@ def new_JntArray(joints_pos):
     
     return j
 
-
 def to_string_JntArray(j):
-    ''' Convert a JntArray into a string '''
+    ''' Convert a kdl.JntArray into a string '''
     
     len = j.rows()
     s = "[ "
@@ -26,19 +25,28 @@ def to_string_JntArray(j):
 
     return s
 
+def point_to_kdl_vector(point):
+    ''' Transform a Point (geometry_msgs) into a kdl.Vector '''
+    return kdl.Vector(point.x, point.y, point.z)
+
+def twist_to_kdl_twist(twist):
+    ''' Transform a Twist (geometry_msgs) into a kdl.Twist '''
+    vel = kdl.Vector(twist.linear.x, twist.linear.y, twist.linear.z)
+    rot = kdl.Vector(twist.angular.x, twist.angular.y, twist.angular.z)
+    tw = kdl.Twist(vel, rot)
+    return tw
+
+
+# ================ #
+# Quaternion utils #
+# ================ #
 
 def quaternion_orientation_error(Qd, Qe):
-    ''''''
+    ''' Compute the orientation error (i.e. the relative rotation)
+    between two quaternions '''
     e = Qe[1] * Qd[0] - Qd[1] * Qe[0] - Qd[0] * Qe[0]
     
     return e
-
-
-
-def point_to_kdl_vector(point):
-    ''' Transform a Point (geometry_msgs) into a kdl Vector '''
-    return kdl.Vector(point.x, point.y, point.z)
-
 
 def quaternion_to_couple(Q):
     ''' Transform a Quaternion (geometry_msgs) or a tuple
@@ -51,6 +59,10 @@ def quaternion_to_couple(Q):
         return (kdl.Vector(Q.x, Q.y, Q.z), Q.w)
 
 
+# ================== #
+# KDL to Numpy utils #
+# ================== #
+
 def Jac_to_numpy(jac):
     ''' Convert a kdl.Jacobian into a np.ndarray '''
 
@@ -62,18 +74,11 @@ def Jac_to_numpy(jac):
 
     return j
 
-
 def Twist_to_numpy(tw):
-    ''' COnvert a kdl.Twist into a np.ndarray '''
+    ''' Convert a kdl.Twist into a np.ndarray '''
 
     a = np.ndarray(shape=(6))
     for i in range(6):
         a[i] = tw[i]
     
     return a
-
-def Twist_max_norm(tw):
-    r = 0
-    for i in range(6):
-        r = max(r, abs(tw[i]))
-    return r

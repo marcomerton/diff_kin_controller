@@ -4,4 +4,6 @@ joint_command_topic: "/iiwa/iiwa_pos_effort_controller/command"
 gripper_command_topic: "/iiwa/grasp_effort_controller/command"
 
 joint_state_topic: "/iiwa/joint_states"
+
 desired_pose_topic: "/iiwa/end_effector_pose/command"
+desired_vel_topic: "/iiwa/end_effector_vel/command"
