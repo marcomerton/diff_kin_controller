@@ -51,7 +51,7 @@ if __name__ == "__main__":
     nsteps = 10
     time_to_elapse = 10
     p0 = np.array([0.7, 0.2, 0.7])      # Initial position
-    p1 = np.array([0.5, -0.5, 0.19])    # Final desired position
+    p1 = np.array([0.5, -0.5, 0.3])     # Final desired position
     
     d = (p1 - p0) / time_to_elapse
     tw = Twist(linear=Vector3(d[0], d[1], d[2]), angular=Vector3(0, 0, 0))
@@ -67,8 +67,15 @@ if __name__ == "__main__":
         pub_vel.publish(tw)
 
         rate.sleep()
-    
 
+
+    rospy.sleep(1)
+
+    p1 = np.array([0.5, -0.5, 0.19])    # Final desired position
+    pose = Pose(position = Point(*tuple(p1)),
+                orientation = Quaternion(0, 1, 0, 0)
+    )
+    pub_pose.publish(pose)
     pub_vel.publish(Twist())
     
     rospy.sleep(2)
