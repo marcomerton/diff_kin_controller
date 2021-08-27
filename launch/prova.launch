@@ -4,5 +4,5 @@
 	<node name="controller_node" pkg="diff_kin_controller" type="ArmController.py"
 			args="$(find kuka_iiwa_description)/urdf/iiwa_gripper.urdf" output="screen" />
 
-	<node name="main_node" pkg="diff_kin_controller" type="prova.py" output="screen" />
+	<node name="main_node" pkg="diff_kin_controller" type="pick_and_place.py" output="screen" />
 </launch>
