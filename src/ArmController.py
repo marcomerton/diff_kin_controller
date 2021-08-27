@@ -58,8 +58,6 @@ class ArmController:
         # Set desired velocity to zero
         self._xdot = kdl.Twist()
 
-        #self._xdot.vel = kdl.Vector(-0.04, -0.14, -0.102)
-
         # Setup desired ee pose listener
         def des_pose_callback(pose):
             self._x_p = point_to_kdl_vector(pose.position)
@@ -180,7 +178,7 @@ if __name__ == "__main__":
     rospy.init_node("kuka_controller")
 
     # Load the robot structure from urdf file
-    urdf_file = rospy.get_param("urdf_file")
+    urdf_file = sys.argv[1]
     res, tree = kdl_parser.treeFromFile(urdf_file)
     if not res:
         rospy.logerr(f"Couldn't load tree from file\n{urdf_file}")
@@ -199,4 +197,4 @@ if __name__ == "__main__":
     c = ArmController(chain, desired_pose_topic, desired_vel_topic, joint_state_topic, joint_command_topic)
 
     # Start controler
-    c.run(verbose=True)
+    c.run(verbose=False)
