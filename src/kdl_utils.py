@@ -45,6 +45,9 @@ def quaternion_orientation_error(Qd, Qe):
     ''' Compute the orientation error (i.e. the relative rotation)
     between two quaternions '''
     e = Qe[1] * Qd[0] - Qd[1] * Qe[0] - Qd[0] * Qe[0]
+    # e[0] = Qd.x * Qe.w + Qe.x * Qd.w + Qd.y * Qe.z - Qd.z * Qe.y
+    # e[1] = Qd.y * Qe.w + Qe.y * Qd.w + Qd.z * Qe.x - Qd.x * Qe.z
+    # e[2] = Qd.z * Qe.w + Qe.z * Qd.w + Qd.x * Qe.y - Qd.y * Qe.x
     
     return e
 
@@ -52,9 +55,8 @@ def quaternion_to_couple(Q):
     ''' Transform a Quaternion (geometry_msgs) or a tuple
     into a (kdl.Vector, scalar) couple
     '''
-
     if isinstance(Q, tuple) and len(Q) == 4:
-        return (kdl.Vector(*Q[0:3]), Q[3])
+        return (kdl.Vector(Q[0], Q[1], Q[2]), Q[3])
     else:
         return (kdl.Vector(Q.x, Q.y, Q.z), Q.w)
 
