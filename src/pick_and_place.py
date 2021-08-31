@@ -94,7 +94,7 @@ if __name__ == "__main__":
     q0 = Quaternion(0, 0, 0, 1)
 
     # Pick position and orientation
-    p1 = np.array([0.5, -0.5, 0.4])
+    p1 = np.array([0.5, -0.505, 0.4])
     q1 = Quaternion(0, 1, 0, 0)
 
     # Place position and orientation
@@ -103,9 +103,10 @@ if __name__ == "__main__":
 
 
     pub_pose.publish(Pose(position = Point(*tuple(p0)), orientation = q0))
+    rospy.sleep(1)
 
 
-    move(p0, q0, p1, q1, 20, 5)
+    move(p0, q0, p1, q1, 30, 5)
 
 
     # == Pick up the cube == #
@@ -113,23 +114,16 @@ if __name__ == "__main__":
     #   1. lower the arm so that the cube is inside the gripper
     #   2. close the gripper
     #   3. bring the arm up again in the original position
+    pick_position = np.array([p1[0], p1[1], 0.195])
 
-    pick_position = np.array([p1[0], p1[1], 0.19])
-
-    # pub_pose.publish(Pose(position = Point(p1[0], p1[1], 0.19),
-    #                       orientation = q1)
-    # )
     move(p1, q1, pick_position, q1, 5, 1)
-    rospy.sleep(2)
+    rospy.sleep(1)
 
     gripper.close()
-    rospy.sleep(2)
+    rospy.sleep(1)
 
-    # pub_pose.publish(Pose(position = Point(*tuple(p1)),
-    #                       orientation = q1)
-    # )
     move(pick_position, q1, p1, q1, 5, 1)
     rospy.sleep(2)
 
 
-    move(p1, q1, p2, q2, 20, 5)
+    move(p1, q1, p2, q2, 40, 5)
