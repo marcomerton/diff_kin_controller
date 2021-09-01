@@ -3,15 +3,10 @@ import numpy as np
 
 import rospy
 from geometry_msgs.msg import Pose, Point, Quaternion, Twist, Vector3
+from quaternion_utils import *
 
 from GripperController import GripperController
 
-'''
-initial_pos = [0, 0, 1.261]
-initial_orient = [[1, 0, 0],
-                  [0, 1, 0],
-                  [0, 0, 1]]
-'''
 
 def interpolate_point(t, p0, p1):
     ''''''
@@ -39,11 +34,12 @@ def slerp(t, P, Q):
     return res
 
 
-def move(start_p, start_o, end_p, end_o, nsteps, time):
+def move(start_p, start_o, end_p, end_o, time, nsteps=10):
 
     # Compute (constant) velocity
-    d = start_p - end_p
-    tw = Twist(linear=Vector3(d[0], d[1], d[2]), angular=Vector3(0, 0, 0))
+    vel = (end_p - start_p) / time
+    omega = get_angular_velocity(start_o, end_o, time)
+    tw = Twist(linear=Vector3(vel[0], vel[1], vel[2]), angular=Vector3(*omega))
 
     # Start following trajectory
     rate = rospy.Rate(nsteps/time * 0.8)
@@ -86,44 +82,36 @@ if __name__ == "__main__":
     gripper = GripperController(gripper_command_topic)
 
     # Sleep to make sure controllers are setup
-    rospy.sleep(3)
+    rospy.sleep(2)
 
 
-    # Initial position and orientation
-    p0 = np.array([0.7, 0.2, 0.7])
-    q0 = Quaternion(0, 0, 0, 1)
+    p_start = np.array([0, 0, 1.126])
+    o_start = Quaternion(0, 0, 0, 1)
 
-    # Pick position and orientation
-    p1 = np.array([0.5, -0.505, 0.4])
-    q1 = Quaternion(0, 1, 0, 0)
+    pick_trajectory = [
+        ( np.array([0.7, 0.2, 0.7]),       Quaternion(0.3, 0.4, 0.4, 0.5),  5,  30 ),
+        ( np.array([0.5, -0.505, 0.4]),    Quaternion(0, 1, 0, 0),          5,  30 ),
+        ( np.array([0.5, -0.505, 0.195]),  Quaternion(0, 1, 0, 0),          2,  20 )
+    ]
+
+    place_trajectory = [
+        ( np.array([0.5, -0.505, 0.3]), Quaternion(0, 1, 0, 0),       2,  20 ),
+        ( np.array([-0.6, -0.2, 0.2]),  Quaternion(-0.5, 0, 0.5, 0),  5,  40 )
+    ]
 
     # Place position and orientation
-    p2 = np.array([-0.7, -0.2, 0.3])
-    q2 = Quaternion(1, 0, 0, 0)
+    p_f = np.array([-0.7, -0.2, 0.3])
+    o_f = Quaternion(0.5, 0.3, 0.2, 0.4)
 
-
-    pub_pose.publish(Pose(position = Point(*tuple(p0)), orientation = q0))
-    rospy.sleep(1)
-
-
-    move(p0, q0, p1, q1, 30, 5)
-
-
-    # == Pick up the cube == #
-    # This is made in 3 steps:
-    #   1. lower the arm so that the cube is inside the gripper
-    #   2. close the gripper
-    #   3. bring the arm up again in the original position
-    pick_position = np.array([p1[0], p1[1], 0.195])
-
-    move(p1, q1, pick_position, q1, 5, 1)
-    rospy.sleep(1)
+    for (p_dest, o_dest, time, nsteps) in pick_trajectory:
+        move(p_start, o_start, p_dest, o_dest, time, nsteps)
+        p_start = p_dest
+        o_start = o_dest
 
     gripper.close()
     rospy.sleep(1)
 
-    move(pick_position, q1, p1, q1, 5, 1)
-    rospy.sleep(2)
-
-
-    move(p1, q1, p2, q2, 40, 5)
+    for (p_dest, o_dest, time, nsteps) in place_trajectory:
+        move(p_start, o_start, p_dest, o_dest, time, nsteps)
+        p_start = p_dest
+        o_start = o_dest
