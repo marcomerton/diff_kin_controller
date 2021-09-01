@@ -8,9 +8,10 @@ import kdl_parser_py.urdf as kdl_parser
 
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
-from geometry_msgs.msg import Pose, Twist
+from geometry_msgs.msg import Pose, Quaternion, Twist
 
 from kdl_utils import *
+from quaternion_utils import orientation_error
 
 
 class ArmController:
@@ -53,7 +54,7 @@ class ArmController:
         # Set desired pose to current pose
         x_e = self._compute_fk(self._joint_position)
         self._x_p = x_e.p
-        self._x_o = quaternion_to_couple(x_e.M.GetQuaternion())
+        self._x_o = Quaternion(*x_e.M.GetQuaternion())
 
         # Set desired velocity to zero
         self._xdot = kdl.Twist()
@@ -61,7 +62,7 @@ class ArmController:
         # Setup desired ee pose listener
         def des_pose_callback(pose):
             self._x_p = point_to_kdl_vector(pose.position)
-            self._x_o = quaternion_to_couple(pose.orientation)
+            self._x_o = pose.orientation
         rospy.Subscriber(desired_pose_topic, Pose, des_pose_callback)
 
         # Setup desired velocity listener
@@ -120,8 +121,8 @@ class ArmController:
 
         e_p = self._x_p - ee_frame.p
 
-        Qe = quaternion_to_couple(ee_frame.M.GetQuaternion())
-        e_o = quaternion_orientation_error(self._x_o, Qe)
+        Qe = Quaternion(*ee_frame.M.GetQuaternion())
+        e_o = kdl.Vector(*orientation_error(self._x_o, Qe))
 
         return kdl.Twist(e_p, e_o)
 
