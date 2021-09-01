@@ -99,10 +99,6 @@ if __name__ == "__main__":
         ( np.array([-0.6, -0.2, 0.2]),  Quaternion(-0.5, 0, 0.5, 0),  5,  40 )
     ]
 
-    # Place position and orientation
-    p_f = np.array([-0.7, -0.2, 0.3])
-    o_f = Quaternion(0.5, 0.3, 0.2, 0.4)
-
     for (p_dest, o_dest, time, nsteps) in pick_trajectory:
         move(p_start, o_start, p_dest, o_dest, time, nsteps)
         p_start = p_dest
