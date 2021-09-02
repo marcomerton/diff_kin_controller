@@ -2,9 +2,9 @@ from geometry_msgs.msg import Quaternion
 
 
 def euler_derivative(qs, qe, delta_t):
-    ''''''
+    ''' Compute the time approximate derivative of a
+    quaternion using Euler method'''
     q_dot = Quaternion()
-
     q_dot.w = (qe.w - qs.w) / delta_t
     q_dot.x = (qe.x - qs.x) / delta_t
     q_dot.y = (qe.y - qs.y) / delta_t
@@ -13,9 +13,9 @@ def euler_derivative(qs, qe, delta_t):
     return q_dot
 
 def conjugate(q): 
-    ''''''
+    ''' Return the conjugate of the given quaternion '''
     q_star = Quaternion()
-
+    q_star.w = q.w
     q_star.x = -q.x
     q_star.y = -q.y
     q_star.z = -q.z
@@ -23,7 +23,8 @@ def conjugate(q):
     return q_star
 
 def get_angular_velocity(qs, qe, delta_t):
-    ''''''
+    ''' Compute the angular velocity to move from orientation
+    qs to orientation qe in delta_t '''
     q_dot = euler_derivative(qs, qe, delta_t)
     q_star = conjugate(qs)
 

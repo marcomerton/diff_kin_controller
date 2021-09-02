@@ -5,13 +5,14 @@ from std_msgs.msg import Float64MultiArray
 
 
 class GripperController:
+    ''' Simple driver to control the gripper '''
 
     def __init__(self, command_topic):
         self._command_publisher = rospy.Publisher(command_topic, Float64MultiArray, queue_size=10)
    
 
     def close(self, verbose=False):
-        ''''''
+        ''' Close the gripper fingers '''
         command = Float64MultiArray()
         command.data = [0.06, 0.06]
 
@@ -22,7 +23,7 @@ class GripperController:
 
 
     def open(self, verbose=False):
-        ''''''
+        ''' Open the gripper fingers '''
         command = Float64MultiArray()
         command.data = [0, 0]
 

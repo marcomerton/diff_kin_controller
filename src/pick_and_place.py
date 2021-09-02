@@ -9,12 +9,12 @@ from GripperController import GripperController
 
 
 def interpolate_point(t, p0, p1):
-    ''''''
+    ''' Linear interpolation between two points '''
     return p1 * t + p0 * (1 - t)
 
 
 def slerp(t, P, Q):
-    ''''''
+    ''' Spherical Linear Interpolation between two quaternions '''
     cos_half_theta = P.w * Q.w + P.x * Q.x + P.y * Q.y + P.z * Q.z
     if abs(cos_half_theta) >= 1:
         return P
@@ -35,6 +35,9 @@ def slerp(t, P, Q):
 
 
 def move(start_p, start_o, end_p, end_o, time, nsteps=10):
+    ''' Move the arm from pose (start_p, start_o) to pose (end_p, end_o) in
+    'time' seconds. The movement is executed linearly interpolating between
+    the two poses 'nsteps' points '''
 
     # Compute (constant) velocity
     vel = (end_p - start_p) / time
@@ -99,15 +102,22 @@ if __name__ == "__main__":
         ( np.array([-0.6, -0.2, 0.2]),  Quaternion(-0.5, 0, 0.5, 0),  5,  40 )
     ]
 
+    # Reach pick position
     for (p_dest, o_dest, time, nsteps) in pick_trajectory:
         move(p_start, o_start, p_dest, o_dest, time, nsteps)
         p_start = p_dest
         o_start = o_dest
 
+    # Pick the cube
     gripper.close()
     rospy.sleep(1)
 
+    # Reach place positon
     for (p_dest, o_dest, time, nsteps) in place_trajectory:
         move(p_start, o_start, p_dest, o_dest, time, nsteps)
         p_start = p_dest
         o_start = o_dest
+
+    # Place the cube
+    gripper.open()
+    rospy.sleep(1)

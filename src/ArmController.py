@@ -28,7 +28,6 @@ class ArmController:
                 state_topic,        # topic name where the joints position is published
                 command_topic,      # topic name where to publish commands for the arm
                 rate = 200,         # rate at which the controller is executed
-                eps = 6e-2          # tolerance for the termination
         ):
 
         # Setup forward kinematics and jacobian solvers
@@ -83,7 +82,7 @@ class ArmController:
             # == Compute end effector pose with forward kinematics ==
             x_e = self._compute_fk(curr_jnt_pos)
 
-            ### Should publish this somewhere
+            ### Should publish this somewhere ?
 
 
             # == Compute position and orientation error ==
