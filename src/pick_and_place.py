@@ -38,24 +38,32 @@ def move(start_p, start_o, end_p, end_o, time, nsteps=10):
     ''' Move the arm from pose (start_p, start_o) to pose (end_p, end_o) in
     'time' seconds. The movement is executed linearly interpolating between
     the two poses 'nsteps' points '''
-
-    # Compute (constant) velocity
-    vel = (end_p - start_p) / time
-    omega = get_angular_velocity(start_o, end_o, time)
-    tw = Twist(linear=Vector3(vel[0], vel[1], vel[2]), angular=Vector3(*omega))
-
-    # Start following trajectory
     rate = rospy.Rate(nsteps/time * 0.8)
+
+    p_old = start_p
+    o_old = start_o
+    t_old = 0
     for step in range(1, nsteps+1):
-        t = step/nsteps
+        t = np.sin(step/nsteps*np.pi/2)
 
+        # Compute pose
         p = interpolate_point(t, start_p, end_p)
-        q = slerp(t, start_o, end_o)
+        o = slerp(t, start_o, end_o)
+        pose = Pose(position = Point(*tuple(p)), orientation = o)
 
-        pose = Pose(position = Point(*tuple(p)), orientation = q)
+        # Compute velocity
+        omega = get_angular_velocity(o_old, o, t-t_old)
+        vel = (p - p_old) / (t - t_old)
+        tw = Twist(linear=Vector3(vel[0], vel[1], vel[2]), angular=Vector3(*omega))
 
+        # Publish commands
         pub_pose.publish(pose)
         pub_vel.publish(tw)
+
+
+        p_old = p
+        o_old = o
+        t_old = t
 
         rate.sleep()
     
@@ -63,7 +71,7 @@ def move(start_p, start_o, end_p, end_o, time, nsteps=10):
     pub_vel.publish(Twist())
 
     # Wait for the arm to stabilize
-    rospy.sleep(1)
+    rospy.sleep(0.5)
 
 
 if __name__ == "__main__":
@@ -98,8 +106,8 @@ if __name__ == "__main__":
     ]
 
     place_trajectory = [
-        ( np.array([0.5, -0.505, 0.3]), Quaternion(0, 1, 0, 0),       2,  20 ),
-        ( np.array([-0.6, -0.2, 0.2]),  Quaternion(-0.5, 0, 0.5, 0),  5,  40 )
+        ( np.array([0.5, -0.505, 0.3]), Quaternion(0, 1, 0, 0),  2,  20 ),
+        ( np.array([-0.5, -0.2, 0.2]),  Quaternion(0, 1, 0, 0),  5,  40 )
     ]
 
     # Reach pick position
