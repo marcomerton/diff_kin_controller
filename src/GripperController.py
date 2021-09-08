@@ -14,7 +14,7 @@ class GripperController:
     def close(self, verbose=False):
         ''' Close the gripper fingers '''
         command = Float64MultiArray()
-        command.data = [0.06, 0.06]
+        command.data = [0.05, 0.05]
 
         if verbose:
             rospy.loginfo(f"Sending: {command.data}")
