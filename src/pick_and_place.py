@@ -38,13 +38,13 @@ def move(start_p, start_o, end_p, end_o, time, nsteps=10):
     ''' Move the arm from pose (start_p, start_o) to pose (end_p, end_o) in
     'time' seconds. The movement is executed linearly interpolating between
     the two poses 'nsteps' points '''
-    rate = rospy.Rate(nsteps/time * 0.8)
+    rate = rospy.Rate(nsteps/time)
+    delta_t = time/nsteps
 
     p_old = start_p
     o_old = start_o
-    t_old = 0
     for step in range(1, nsteps+1):
-        t = np.sin(step/nsteps*np.pi/2)
+        t = (1 + np.sin(np.pi * step/nsteps - np.pi/2)) / 2
 
         # Compute pose
         p = interpolate_point(t, start_p, end_p)
@@ -52,8 +52,8 @@ def move(start_p, start_o, end_p, end_o, time, nsteps=10):
         pose = Pose(position = Point(*tuple(p)), orientation = o)
 
         # Compute velocity
-        omega = get_angular_velocity(o_old, o, t-t_old)
-        vel = (p - p_old) / (t - t_old)
+        vel = (p - p_old) / delta_t
+        omega = get_angular_velocity(o_old, o, delta_t)
         tw = Twist(linear=Vector3(vel[0], vel[1], vel[2]), angular=Vector3(*omega))
 
         # Publish commands
@@ -63,7 +63,6 @@ def move(start_p, start_o, end_p, end_o, time, nsteps=10):
 
         p_old = p
         o_old = o
-        t_old = t
 
         rate.sleep()
     
@@ -100,14 +99,14 @@ if __name__ == "__main__":
     o_start = Quaternion(0, 0, 0, 1)
 
     pick_trajectory = [
-        ( np.array([0.7, 0.2, 0.7]),       Quaternion(0.3, 0.4, 0.4, 0.5),  5,  30 ),
-        ( np.array([0.5, -0.505, 0.4]),    Quaternion(0, 1, 0, 0),          5,  30 ),
-        ( np.array([0.5, -0.505, 0.195]),  Quaternion(0, 1, 0, 0),          2,  20 )
+        ( np.array([0.7, 0.2, 0.7]),       Quaternion(0.3, 0.4, 0.4, 0.5),  5,  50 ),
+        ( np.array([0.5, -0.505, 0.4]),    Quaternion(0, 1, 0, 0),          5,  50 ),
+        ( np.array([0.5, -0.505, 0.195]),  Quaternion(0, 1, 0, 0),          1,  50 )
     ]
 
     place_trajectory = [
-        ( np.array([0.5, -0.505, 0.3]), Quaternion(0, 1, 0, 0),  2,  20 ),
-        ( np.array([-0.5, -0.2, 0.2]),  Quaternion(0, 1, 0, 0),  5,  40 )
+        ( np.array([0.5, -0.505, 0.3]), Quaternion(0, 1, 0, 0),  1,  50 ),
+        ( np.array([-0.3, -0.2, 0.3]),  Quaternion(0, 1, 0, 0.3),  5,  50 )
     ]
 
     # Reach pick position
