@@ -1,5 +1,6 @@
 <launch>
 	<rosparam command="load" file="$(find diff_kin_controller)/config/params.yaml" />
+	<rosparam command='load' file="$(find diff_kin_controller)/config/trajectory.yaml" />
 	
 	<node name="controller_node" pkg="diff_kin_controller" type="ArmController.py"
 			args="$(find kuka_iiwa_description)/urdf/iiwa_gripper.urdf" output="screen" />

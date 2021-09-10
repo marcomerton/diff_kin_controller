@@ -37,7 +37,8 @@ def slerp(t, P, Q):
 def move(start_p, start_o, end_p, end_o, time, nsteps=10):
     ''' Move the arm from pose (start_p, start_o) to pose (end_p, end_o) in
     'time' seconds. The movement is executed linearly interpolating between
-    the two poses 'nsteps' points '''
+    the two poses 'nsteps' points. The generated profiles follow a sinuosidal
+    curve. '''
     rate = rospy.Rate(nsteps/time)
     delta_t = time/nsteps
 
@@ -98,20 +99,16 @@ if __name__ == "__main__":
     p_start = np.array([0, 0, 1.126])
     o_start = Quaternion(0, 0, 0, 1)
 
-    pick_trajectory = [
-        ( np.array([0.7, 0.2, 0.7]),       Quaternion(0.3, 0.4, 0.4, 0.5),  5,  50 ),
-        ( np.array([0.5, -0.505, 0.4]),    Quaternion(0, 1, 0, 0),          5,  50 ),
-        ( np.array([0.5, -0.505, 0.195]),  Quaternion(0, 1, 0, 0),          1,  50 )
-    ]
-
-    place_trajectory = [
-        ( np.array([0.5, -0.505, 0.3]), Quaternion(0, 1, 0, 0),  1,  50 ),
-        ( np.array([-0.3, -0.2, 0.3]),  Quaternion(0, 1, 0, 0.3),  5,  50 )
-    ]
+    pick_trajectory = rospy.get_param('pick_trajectory')
+    place_trajectory = rospy.get_param('place_trajectory')
 
     # Reach pick position
-    for (p_dest, o_dest, time, nsteps) in pick_trajectory:
-        move(p_start, o_start, p_dest, o_dest, time, nsteps)
+    for v in pick_trajectory:
+        p_dest = np.array(v['position'])
+        o_dest = Quaternion(*tuple(v['orientation']))
+
+        move(p_start, o_start, p_dest, o_dest, v['time'], v['nsteps'])
+
         p_start = p_dest
         o_start = o_dest
 
@@ -120,8 +117,12 @@ if __name__ == "__main__":
     rospy.sleep(1)
 
     # Reach place positon
-    for (p_dest, o_dest, time, nsteps) in place_trajectory:
-        move(p_start, o_start, p_dest, o_dest, time, nsteps)
+    for v in place_trajectory:
+        p_dest = np.array(v['position'])
+        o_dest = Quaternion(*tuple(v['orientation']))
+
+        move(p_start, o_start, p_dest, o_dest, v['time'], v['nsteps'])
+
         p_start = p_dest
         o_start = o_dest
 
