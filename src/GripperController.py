@@ -9,12 +9,12 @@ class GripperController:
 
     def __init__(self, command_topic):
         self._command_publisher = rospy.Publisher(command_topic, Float64MultiArray, queue_size=10)
-   
+
 
     def close(self, verbose=False):
         ''' Close the gripper fingers '''
         command = Float64MultiArray()
-        command.data = [0.05, 0.05]
+        command.data = [0.038, 0.038]
 
         if verbose:
             rospy.loginfo(f"Sending: {command.data}")
