@@ -1,7 +1,7 @@
 # Differential Kinematic Controller
 
 This ROS package implements a simple differential kinematic controller as the one described in [[1]](#1).
-The controller uses the damped SVD to invert the Jacobian and compute the joints velocities given the position and orientation error of the end effector. The velocities are then integrated to compute the new joints positions. The controller also supports velocity commands for the end effector. Eventual redundancy in the arm are not exploited.
+The controller uses the damped SVD to invert the Jacobian and compute the joints velocities given the position and orientation errors of the end effector. The velocities are then integrated to compute the new joints positions. The controller also supports velocity commands for the end effector. Eventual redundancy in the arm is not exploited.
 
 It also contains an example of pick and place application. Given the pick pose and the place pose, and possibly some waypoints to pass through, a ROS node generates a sequence of commands for the controller, interpolating between successive waypoints.
 
