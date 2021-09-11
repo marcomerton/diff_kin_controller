@@ -178,10 +178,10 @@ if __name__ == "__main__":
     rospy.init_node("kuka_controller")
 
     # Load the robot structure from urdf file
-    urdf_file = sys.argv[1]
-    res, tree = kdl_parser.treeFromFile(urdf_file)
+    urdf = sys.argv[1]
+    res, tree = kdl_parser.treeFromFile(urdf)
     if not res:
-        rospy.logerr(f"Couldn't load tree from file\n{urdf_file}")
+        rospy.logerr(f"Couldn't load tree from file\n{urdf}")
         sys.exit(1)
 
     # Get arm chain
