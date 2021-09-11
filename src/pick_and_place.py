@@ -3,7 +3,7 @@ import numpy as np
 
 import rospy
 from geometry_msgs.msg import Pose, Point, Quaternion, Twist, Vector3
-from quaternion_utils import *
+from utils.quaternion import *
 
 from GripperController import GripperController
 

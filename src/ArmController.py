@@ -10,8 +10,8 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
 from geometry_msgs.msg import Pose, Quaternion, Twist
 
-from kdl_utils import *
-from quaternion_utils import orientation_error
+from utils.kdl import *
+from utils.quaternion import orientation_error
 
 
 class ArmController:
